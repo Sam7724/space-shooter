@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Space Shooter</title>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="500" height="600"
+style="background:black; display:block; margin:auto;">
+</canvas>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let player = { x: 220, y: 550, width: 60, height: 20 };
+let bullet = { x: 0, y: 0, width: 5, height: 10, active: false };
+let enemy = { x: 200, y: 50, width: 40, height: 20 };
+let score = 0;
+
+
+let keys = {};
+
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+function update() {
+
+    // Player movement
+    if (keys["ArrowLeft"] && player.x > 0)
+        player.x -= 8;
+
+    if (keys["ArrowRight"] && player.x < 440)
+        player.x += 8;
+
+    // Shoot bullet
+    if (keys[" "] && !bullet.active) {
+        bullet.x = player.x + 28;
+        bullet.y = player.y;
+        bullet.active = true;
+    }
+
+    // Bullet movement
+    if (bullet.active) {
+        bullet.y -= 7;
+        if (bullet.y < 0) bullet.active = false;
+    }
+
+    // Enemy movement
+    enemy.y += 4;
+    if (enemy.y > 600) {
+        enemy.y = 0;
+        enemy.x = Math.random() * 460;
+    }
+
+    // Collision
+    if (bullet.active &&
+        bullet.x < enemy.x + enemy.width &&
+        bullet.x + bullet.width > enemy.x &&
+        bullet.y < enemy.y + enemy.height &&
+        bullet.y + bullet.height > enemy.y) {
+
+        bullet.active = false;
+        enemy.y = 0;
+        enemy.x = Math.random() * 460;
+
+        score += 10;
+    }
+}
+
+function draw() {
+    ctx.clearRect(0,0,500,600);
+
+    ctx.fillStyle = "white";
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+
+    if (bullet.active)
+        ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+
+    ctx.fillStyle = "red";
+    ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+
+    ctx.fillStyle = "white";
+    ctx.font = "20px Arial";
+    ctx.fillText("Score: " + score, 10, 30);
+
+}
+
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+
+</body>
+</html>
